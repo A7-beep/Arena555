@@ -268,5 +268,4 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`Arena555 ishlayapti: http://localhost:${PORT}`);
-  if (generated) {
-    console.log('\n  ADMIN PAROLI (faqa
+});
