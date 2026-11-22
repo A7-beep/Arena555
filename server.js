@@ -251,7 +251,7 @@ const server = http.createServer(async (req, res) => {
       if (m === 'POST' && p === '/api/admin/prices') {
         const b = await readBody(req);
         const v = (x, max) => Number.isInteger(x) && x >= 0 && x <= max;
-  uchun        if (!v(b.slot, 1e9) || !v(b.silver, 1e9) || !v(b.gold, 1e9) || !v(b.discount, 100))
+          if (!v(b.slot, 1e9) || !v(b.silver, 1e9) || !v(b.gold, 1e9) || !v(b.discount, 100))
           throw fail(400, 'Narxlar noto‘g‘ri');
         db.prices = { slot: b.slot, silver: b.silver, gold: b.gold, discount: b.discount };
         save(); return send(res, 200, { ok: true, prices: db.prices });
