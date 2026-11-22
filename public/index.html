@@ -337,4 +337,53 @@ function renderAdmin(){
       <div class="btns">${s.status==='pending'?`<button class="btn ok" onclick="adminSub(${s.id},'accept')">Qabul</button>`:''}<button class="btn no" onclick="adminSub(${s.id},'delete')">O'chirish</button></div></div>`}).join('')
     :`<p class="empty">Obunalar yo'q</p>`;
   $('aBooks').innerHTML=A.bookings.length?A.bookings.map(b=>
-    `<div class="bk"><div><b>${b
+    `<div class="bk"><div><b>${b.stadium} Maydon</b> • ${b.date.slice(8)}.${b.date.slice(5,7)} • ${pad(b.hour)}:00-${pad((b.hour+1)%24)}:00
+      <small>${esc(b.name)} • ${ph(b.phone)} • ${money(b.price)} so'm • <span class="${stl[b.status][1]}">${stl[b.status][0]}</span></small></div>
+      <div class="btns">${b.status==='pending'?`<button class="btn ok" onclick="adminBook(${b.id},'accept')">Qabul</button>`:''}<button class="btn no" onclick="adminBook(${b.id},'delete')">O'chirish</button></div></div>`).join('')
+    :`<p class="empty">Bronlar yo'q</p>`;
+}
+async function adminBook(id,action){
+  if(action==='delete'&&!confirm("Bu bron o'chirilsinmi? Vaqt bo'shaydi."))return;
+  try{await api('/api/admin/booking',{method:'POST',admin:true,body:{id,action}})}catch(e){toast(e.message,true)}
+  await loadAdmin();refresh();
+}
+async function adminSub(id,action){
+  if(action==='delete'&&!confirm("Bu obuna o'chirilsinmi?"))return;
+  try{await api('/api/admin/sub',{method:'POST',admin:true,body:{id,action}})}catch(e){toast(e.message,true)}
+  await loadAdmin();refresh();
+}
+async function savePrices(){
+  const n=id=>Number($(id).value.replace(/\s/g,''));
+  try{
+    await api('/api/admin/prices',{method:'POST',admin:true,body:{slot:n('pSlot'),discount:n('pDisc'),silver:n('pSil'),gold:n('pGol')}});
+    toast('✅ Narxlar saqlandi');
+  }catch(e){toast(e.message,true)}
+  pricesFilled=false;await loadAdmin();refresh();
+}
+async function adminLogin(){
+  try{
+    const r=await api('/api/admin/login',{method:'POST',body:{password:$('aPass').value}});
+    ls.set('a555_admin',r.token);$('aPass').value='';$('aErr').textContent='';closeOv('loginOv');
+    history.replaceState(null,'',location.pathname+location.search);
+    isAdmin=true;pricesFilled=false;curField='ADMIN';await loadAdmin();render();
+  }catch(e){$('aErr').textContent=e.message}
+}
+function adminLogout(){ls.set('a555_admin','');isAdmin=false;A=null;curField='A';render()}
+function checkHash(){if(location.hash==='#admin'&&!isAdmin)openOv('loginOv')}
+window.addEventListener('hashchange',checkHash);
+
+(async function init(){
+  $('name').value=getName();
+  $('phone').value=fmtPhone(getPhone());
+  $('sName').value=getName();
+  $('sPhone').value=fmtPhone(getPhone());
+  const ok=await refresh();
+  await loadAdmin();
+  render();
+  checkHash();
+  if(ok&&!S.sub&&!(location.hash==='#admin'))setTimeout(()=>openOv('subOv'),300);
+  setInterval(()=>{if(!document.hidden){refresh();if(isAdmin&&curField==='ADMIN')loadAdmin()}},8000);
+})();
+</script>
+</body>
+</html>
