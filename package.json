@@ -1,0 +1,8 @@
+{
+  "name": "arena555",
+  "version": "1.0.0",
+  "description": "Arena555 – Namangan mini stadionlari uchun bron tizimi",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}
