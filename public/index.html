@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arena555</title>
+<style>
+  :root{--bg:#0e1a12;--card:#16281c;--line:#24402d;--g:#2ecc71;--txt:#eafaf0;--mut:#8fb59b;--red:#e74c3c;--gold:#f1c40f;--silver:#cfd8dc;--lime:#bfff00}
+  *{box-sizing:border-box;margin:0;padding:0}
+  button{font-family:inherit;cursor:pointer}
+  body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;padding-bottom:100px}
+  .topbar{display:flex;justify-content:flex-end;padding:12px 12px 0;min-height:12px}
+  .card-chip{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 12px;text-align:right;color:var(--txt);font-size:14px;font-weight:700;letter-spacing:.5px}
+  .card-chip small{display:block;font-weight:400;font-size:11px;color:var(--mut);letter-spacing:0}
+  .card-chip.empty{border-style:dashed;color:var(--lime);font-weight:600;letter-spacing:0}
+  .hero{text-align:left;padding:10px 16px 14px}
+  .logo{font-size:clamp(46px,16vw,84px);font-weight:900;letter-spacing:-2px;line-height:1}
+  .logo b{color:var(--g)}
+  .tag{color:var(--mut);margin-top:10px;font-size:15px}
+  .subbtn{position:fixed;bottom:18px;right:14px;z-index:40;border:none;background:var(--lime);color:#1a2600;border-radius:24px;padding:13px 22px;font-weight:800;font-size:16px;box-shadow:0 4px 16px rgba(0,0,0,.5)}
+  .badge{position:fixed;bottom:18px;right:14px;z-index:40;font-size:15px;padding:10px 16px;border-radius:20px;background:var(--card);border:1px solid var(--line);box-shadow:0 4px 16px rgba(0,0,0,.5)}
+  .tabs{display:grid;gap:8px;padding:6px 12px 10px;position:sticky;top:0;background:var(--bg);z-index:5}
+  .tab{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px 4px;text-align:center;color:var(--txt);font-size:15px;font-weight:700}
+  .tab.active{border-color:var(--g);background:#1d3a27}
+  .tab.admin{border-color:var(--lime);color:var(--lime)}
+  .tab.admin.active{background:#27320a}
+  .wrap{padding:0 12px;max-width:620px;margin:0 auto}
+  h2{font-size:18px;margin:18px 0 8px}
+  h2 small{color:var(--mut);font-weight:400;font-size:13px}
+  .offline{display:none;background:#3a1a1a;border:1px solid var(--red);color:#ffb3a8;border-radius:12px;padding:12px;margin:12px 0;font-size:14px}
+  .note{color:var(--mut);font-size:13px;margin-bottom:8px}
+  .note s{color:#777}.note b{color:var(--lime)}
+  .days{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px}
+  .day{flex:0 0 128px;height:68px;background:var(--card);border:2px solid var(--line);border-radius:14px;text-align:center;color:var(--txt);font-size:17px;line-height:1.25}
+  .day.active{background:var(--g);border-color:var(--g);color:#06210f;font-weight:700}
+  .slots{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .slot{height:68px;border-radius:14px;text-align:center;border:2px solid var(--g);background:var(--card);color:var(--txt);font-size:17px;font-weight:700;line-height:1.25}
+  .slot small{display:block;font-size:12px;font-weight:400;color:var(--mut)}
+  .slot.busy,.slot.past{border-color:#3a3a3a;background:#171717;color:#666;cursor:not-allowed}
+  .slot.busy .t,.slot.past .t{text-decoration:line-through;text-decoration-thickness:2px;text-decoration-color:var(--red)}
+  .slot.past .t{text-decoration-color:#555}
+  .slot.mine{border-color:var(--gold);color:var(--gold)}
+  .slot.mine small{color:var(--gold)}
+  .info,.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+  input.t{width:100%;padding:12px;border-radius:10px;border:1px solid var(--line);background:#0e1a12;color:var(--txt);font-size:16px;margin-top:6px}
+  .err{color:var(--red);font-size:13px;min-height:18px;margin-top:4px}
+  .bk{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px}
+  .bk small{display:block;color:var(--mut);margin-top:2px}
+  .st-p{color:var(--gold)}.st-a{color:var(--g)}.st-x{color:var(--mut)}
+  .btn{border:1px solid var(--line);background:none;color:var(--txt);border-radius:8px;padding:7px 11px;font-size:13px}
+  .btn.ok{border-color:var(--g);color:var(--g)}
+  .btn.no{border-color:var(--red);color:var(--red)}
+  .btns{display:flex;gap:6px;flex-shrink:0}
+  .empty{color:var(--mut);font-size:14px;margin-bottom:8px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid2 label{font-size:13px;color:var(--mut)}
+  .ov{position:fixed;inset:0;background:rgba(0,0,0,.65);display:none;z-index:50;align-items:flex-end;justify-content:center}
+  .ov.show{display:flex}
+  .sheet{background:#13241a;width:100%;max-width:560px;border-radius:22px 22px 0 0;padding:18px;overflow-y:auto;height:66.67vh}
+  .sheet.small{height:auto}
+  .sheet h3{font-size:20px;margin-bottom:4px}
+  .close{float:right;background:none;border:none;color:var(--mut);font-size:26px}
+  .plan{border:2px solid var(--line);border-radius:16px;padding:14px;margin:10px 0;cursor:pointer;display:block}
+  .plan.sel.silver{border-color:var(--silver);background:#1c2a30}
+  .plan.sel.gold{border-color:var(--gold);background:#2d2a12}
+  .plan h4{font-size:18px}.plan p{font-size:13px;color:var(--mut);margin-top:4px}
+  .plan .pr{float:right;font-weight:700}
+  .main{width:100%;padding:14px;border:none;border-radius:12px;background:var(--g);color:#06210f;font-size:16px;font-weight:700;margin-top:8px}
+  .ghost{width:100%;padding:12px;background:none;border:none;color:var(--mut);margin-top:4px}
+  .toast{position:fixed;left:50%;bottom:84px;transform:translateX(-50%);background:var(--g);color:#06210f;padding:12px 18px;border-radius:12px;font-weight:700;display:none;z-index:99;text-align:center;max-width:90vw}
+  .toast.bad{background:var(--red);color:#fff}
+</style>
+</head>
+<body>
+
+<div class="topbar"><div id="cardBox"></div></div>
+<div class="hero">
+  <div class="logo">Arena<b>555</b></div>
+  <p class="tag">Arena555da vaqtingizni chog‘ o‘tkazing</p>
+</div>
+
+<section class="tabs" id="tabs"></section>
+
+<main class="wrap">
+  <div class="offline" id="offline">Server bilan aloqa yo‘q. Sayt serverdan ochilishi kerak: serverni ishga tushirib (node server.js), brauzerda http://localhost:3000 ni oching.</div>
+  <div id="userView">
+    <h2>Sana</h2>
+    <div class="days" id="days"></div>
+
+    <h2>Vaqt <small>(1 soat)</small></h2>
+    <p class="note" id="priceNote"></p>
+    <div class="slots" id="slots"></div>
+
+    <h2>Ma'lumotlaringiz</h2>
+    <div class="info">
+      <label for="name">Ismingiz:</label>
+      <input class="t" id="name" autocomplete="name" maxlength="40" oninput="onName()" style="margin-bottom:12px">
+      <label for="phone">Telefon raqamingiz:</label>
+      <input class="t" id="phone" inputmode="numeric" autocomplete="tel" oninput="maskPhone(this);onPhone()" onfocus="maskPhone(this)">
+      <div class="err" id="err"></div>
+    </div>
+
+    <h2>Mening bronlarim:</h2>
+    <div id="mine"></div>
+  </div>
+
+  <div id="adminView" style="display:none">
+    <h2>To'lov kartasi</h2>
+    <div class="card">
+      <label style="font-size:13px;color:var(--mut)" for="cNum">Karta raqami (tepada o'ng tomonda ko'rinadi)</label>
+      <input class="t" id="cNum" inputmode="numeric" placeholder="0000 0000 0000 0000" oninput="maskCard(this)">
+      <label style="font-size:13px;color:var(--mut);display:block;margin-top:10px" for="cHol">Karta egasi</label>
+      <input class="t" id="cHol" maxlength="40">
+      <div class="err" id="cErr"></div>
+      <button class="main" onclick="saveCard()">Kartani saqlash</button>
+    </div>
+
+    <h2>Narxlar</h2>
+    <div class="card">
+      <div class="grid2">
+        <div><label for="pSlot">1 soatlik bron (so'm)</label><input class="t" id="pSlot" inputmode="numeric"></div>
+        <div><label for="pDisc">Obunachi chegirmasi (%)</label><input class="t" id="pDisc" inputmode="numeric"></div>
+        <div><label for="pSil">Silver ⚡ oylik (so'm)</label><input class="t" id="pSil" inputmode="numeric"></div>
+        <div><label for="pGol">Gold 👑 yillik (so'm)</label><input class="t" id="pGol" inputmode="numeric"></div>
+      </div>
+      <button class="main" onclick="savePrices()">Narxlarni saqlash</button>
+    </div>
+
+    <h2>Obunalar</h2>
+    <div id="aSubs"></div>
+
+    <h2>Bronlar</h2>
+    <div id="aBooks"></div>
+
+    <button class="ghost" onclick="adminLogout()">Admindan chiqish</button>
+  </div>
+</main>
+
+<div id="planBox"></div>
+
+<div class="ov" id="subOv">
+  <div class="sheet">
+    <button class="close" onclick="closeOv('subOv')">×</button>
+    <h3>Obuna bo'ling</h3>
+    <p style="color:var(--mut);font-size:13px">Obunachilarga har bir bronda <b id="discTxt">20%</b> chegirma. Obuna admin tasdiqlagach faollashadi.</p>
+    <label class="plan silver" id="pSilver" onclick="pickPlan('silver')">
+      <span class="pr" id="prSilver"></span><h4>Silver ⚡</h4><p>Oylik obuna</p>
+    </label>
+    <label class="plan gold" id="pGold" onclick="pickPlan('gold')">
+      <span class="pr" id="prGold"></span><h4>Gold 👑</h4><p>Yillik obuna</p>
+    </label>
+    <input class="t" id="sName" placeholder="Ismingiz" maxlength="40">
+    <input class="t" id="sPhone" inputmode="numeric" oninput="maskPhone(this)" onfocus="maskPhone(this)">
+    <div class="err" id="sErr"></div>
+    <button class="main" onclick="subscribe()">Obuna bo'lish</button>
+    <button class="ghost" onclick="closeOv('subOv')">Keyinroq</button>
+  </div>
+</div>
+
+<div class="ov" id="loginOv">
+  <div class="sheet small">
+    <button class="close" onclick="closeOv('loginOv')">×</button>
+    <h3>Admin kirishi</h3>
+    <input class="t" id="aPass" type="password" placeholder="Parol" autocomplete="current-password" onkeydown="if(event.key==='Enter')adminLogin()">
+    <div class="err" id="aErr"></div>
+    <button class="main" onclick="adminLogin()">Kirish</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const money=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+const ls={
+  get:(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+};
+const PLAN={silver:'Silver ⚡',gold:'Gold 👑'};
+const rand=()=>Math.random().toString(36).slice(2,12);
+let clientId=ls.get('a555_cid',null);
+if(!clientId){clientId=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():Date.now().toString(36)+rand()+rand();ls.set('a555_cid',clientId)}
+
+async function api(path,{method='GET',body,admin}={}){
+  const h={}; if(body)h['Content-Type']='application/json'; if(admin)h['x-admin-token']=ls.get('a555_admin','');
+  let r; try{r=await fetch(path,{method,headers:h,body:body?JSON.stringify(body):undefined})}catch(e){throw new Error('Server bilan aloqa yo‘q')}
+  let j={}; try{j=await r.json()}catch(e){}
+  if(!r.ok){const er=new Error(j.error||'Xatolik');er.status=r.status;throw er}
+  return j;
+}
+function toast(t,bad){const e=$('toast');e.textContent=t;e.className='toast'+(bad?' bad':'');e.style.display='block';clearTimeout(e._t);e._t=setTimeout(()=>e.style.display='none',2800)}
+const openOv=id=>$(id).classList.add('show'), closeOv=id=>$(id).classList.remove('show');
+
+function fmtPhone(d){
+  let o='+998'; if(d.length)o+=' '+d.slice(0,2);
+  if(d.length>2)o+=' '+d.slice(2,5); if(d.length>5)o+=' '+d.slice(5,7); if(d.length>7)o+=' '+d.slice(7,9);
+  return o;
+}
+function digitsOf(v){let d=v.replace(/\D/g,''); if(d.startsWith('998'))d=d.slice(3); return d.slice(0,9)}
+function maskPhone(el){el.value=fmtPhone(digitsOf(el.value));const n=el.value.length;try{el.setSelectionRange(n,n)}catch(e){}}
+const getPhone=()=>ls.get('a555_phone','');
+const getName=()=>ls.get('a555_name','');
+
+let S=null, A=null, isAdmin=false, curField='A', curDate=null, plan=null, pricesFilled=false;
+
+async function refresh(){
+  try{S=await api(`/api/state?client=${encodeURIComponent(clientId)}&phone=${getPhone()}`);$('offline').style.display='none'}catch(e){$('offline').style.display='block';return false}
+  if(!S.days.includes(curDate))curDate=S.days[0];
+  render();return true;
+}
+
+function render(){
+  renderTabs();
+  const adminTab=curField==='ADMIN'&&isAdmin;
+  $('userView').style.display=adminTab?'none':'block';
+  $('adminView').style.display=adminTab?'block':'none';
+  if(!S)return;
+  renderDays();renderSlots();renderMine();renderPlan();renderCard();
+  $('prSilver').textContent=money(S.prices.silver)+" so'm / oy";
+  $('prGold').textContent=money(S.prices.gold)+" so'm / yil";
+  $('discTxt').textContent=S.prices.discount+'%';
+}
+function renderTabs(){
+  const list=['A','B','C'].map(f=>({id:f,label:f+' Maydon'}));
+  if(isAdmin){const pend=A?A.bookings.filter(b=>b.status==='pending').length+A.subs.filter(s=>s.status==='pending').length:0;
+    list.push({id:'ADMIN',label:'Admin'+(pend?' ('+pend+')':''),admin:true})}
+  $('tabs').style.gridTemplateColumns=`repeat(${list.length},1fr)`;
+  $('tabs').innerHTML=list.map(t=>`<button class="tab ${t.admin?'admin':''} ${t.id===curField?'active':''}" onclick="setField('${t.id}')">${t.label}</button>`).join('');
+}
+function setField(f){curField=f;if(f==='ADMIN'){pricesFilled=false;loadAdmin()}render()}
+
+function renderDays(){
+  const nm=['Yak','Dush','Sesh','Chor','Pay','Jum','Shan'];
+  $('days').innerHTML=S.days.map(v=>{const d=new Date(v+'T00:00:00Z');
+    return `<button class="day ${v===curDate?'active':''}" onclick="curDate='${v}';render()">${nm[d.getUTCDay()]}<br><b>${v.slice(8)}.${v.slice(5,7)}</b></button>`}).join('');
+}
+const activeSub=()=>S&&S.sub&&S.sub.status==='active'&&S.sub.until>Date.now();
+function renderSlots(){
+  const map={}; S.taken.forEach(t=>map[t.k]=t);
+  let h='';
+  for(let s=0;s<24;s++){
+    const label=`${pad(s)}:00-${pad((s+1)%24)}:00`, t=map[`${curField==='ADMIN'?'A':curField}|${curDate}|${s}`];
+    const past=curDate===S.now.date&&S.now.hour>=s;
+    if(t) h+=`<button class="slot busy ${t.mine?'mine':''}" disabled><span class="t">${label}</span><small>${t.mine?'Sizniki':'Band'}</small></button>`;
+    else if(past) h+=`<button class="slot past" disabled><span class="t">${label}</span></button>`;
+    else h+=`<button class="slot" onclick="book(${s})"><span class="t">${label}</span></button>`;
+  }
+  $('slots').innerHTML=h;
+  const base=S.prices.slot, f=curField==='ADMIN'?'A':curField;
+  $('priceNote').innerHTML=activeSub()
+    ? `${f} Maydon • 1 soat: <s>${money(base)}</s> <b>${money(Math.round(base*(100-S.prices.discount)/100))} so'm</b> (obunachi narxi)`
+    : `${f} Maydon • 1 soat: ${money(base)} so'm`;
+}
+function renderMine(){
+  const st={pending:['Kutilmoqda','st-p'],accepted:['Tasdiqlandi','st-a']};
+  $('mine').innerHTML=S.mine.length?S.mine.sort((a,b)=>(a.date+pad(a.hour)).localeCompare(b.date+pad(b.hour))).map(b=>
+    `<div class="bk"><div>${b.stadium} Maydon • ${b.date.slice(8)}.${b.date.slice(5,7)} • ${pad(b.hour)}:00-${pad((b.hour+1)%24)}:00
+      <small>${money(b.price)} so'm • <span class="${st[b.status][1]}">${st[b.status][0]}</span></small></div>
+      <div class="btns"><button class="btn no" onclick="cancel(${b.id})">Bekor</button></div></div>`).join('')
+    :`<p class="empty">Hozircha o'yinlar yo'q</p>`;
+}
+function renderCard(){
+  const c=S.card||{number:'',holder:''};
+  if(c.number){
+    $('cardBox').innerHTML=`<button class="card-chip" onclick="copyCard()">💳 ${esc(fmtCard(c.number))}${c.holder?`<small>${esc(c.holder)} • bosib nusxalang</small>`:'<small>bosib nusxalang</small>'}</button>`;
+  } else if(isAdmin){
+    $('cardBox').innerHTML=`<button class="card-chip empty" onclick="setField('ADMIN')">+ Karta qo'shish</button>`;
+  } else $('cardBox').innerHTML='';
+}
+const fmtCard=n=>n.replace(/(\d{4})(?=\d)/g,'$1 ');
+function maskCard(el){el.value=fmtCard(el.value.replace(/\D/g,'').slice(0,16))}
+async function copyCard(){
+  try{await navigator.clipboard.writeText(S.card.number);toast('Karta raqami nusxalandi')}catch(e){toast(fmtCard(S.card.number))}
+}
+async function saveCard(){
+  try{
+    await api('/api/admin/card',{method:'POST',admin:true,body:{number:$('cNum').value,holder:$('cHol').value}});
+    $('cErr').textContent='';toast('✅ Karta saqlandi');
+  }catch(e){return $('cErr').textContent=e.message}
+  await loadAdmin();refresh();
+}
+function renderPlan(){
+  const s=S.sub;
+  $('planBox').innerHTML=s?`<span class="badge">${PLAN[s.plan]}${s.status==='pending'?' · kutilmoqda':''}</span>`
+    :`<button class="subbtn" onclick="openOv('subOv')">Obuna bo'ling</button>`;
+}
+
+function onName(){ls.set('a555_name',$('name').value.trim());$('err').textContent=''}
+function onPhone(){
+  const d=digitsOf($('phone').value); ls.set('a555_phone',d); $('err').textContent='';
+  if(d.length===9||d.length===0)refresh();
+}
+async function book(s){
+  const nm=$('name').value.trim(), ph=digitsOf($('phone').value);
+  if(nm.length<2){$('err').textContent='Avval ismingizni kiriting';$('name').scrollIntoView({behavior:'smooth',block:'center'});$('name').focus();return}
+  if(ph.length!==9){$('err').textContent="Telefon raqami 9 ta raqamdan iborat bo'lishi kerak";$('phone').scrollIntoView({behavior:'smooth',block:'center'});$('phone').focus();return}
+  try{
+    await api('/api/book',{method:'POST',body:{stadium:curField,date:curDate,hour:s,name:nm,phone:ph,client:clientId}});
+    toast(`✅ ${pad(s)}:00-${pad((s+1)%24)}:00 band qilindi`);
+  }catch(e){toast(e.message,true)}
+  refresh();
+}
+async function cancel(id){
+  try{await api('/api/cancel',{method:'POST',body:{id,client:clientId}})}catch(e){toast(e.message,true)}
+  refresh();
+}
+function pickPlan(p){plan=p;$('pSilver').classList.toggle('sel',p==='silver');$('pGold').classList.toggle('sel',p==='gold')}
+async function subscribe(){
+  const nm=$('sName').value.trim(), ph=digitsOf($('sPhone').value);
+  if(!plan)return $('sErr').textContent='Silver yoki Gold ni tanlang';
+  if(nm.length<2)return $('sErr').textContent='Ismingizni kiriting';
+  if(ph.length!==9)return $('sErr').textContent="Telefon raqami 9 ta raqamdan iborat bo'lishi kerak";
+  try{
+    await api('/api/subscribe',{method:'POST',body:{plan,name:nm,phone:ph,client:clientId}});
+  }catch(e){return $('sErr').textContent=e.message}
+  ls.set('a555_phone',ph);ls.set('a555_name',nm);$('phone').value=fmtPhone(ph);$('name').value=nm;
+  $('sErr').textContent='';closeOv('subOv');
+  toast(PLAN[plan]+" so'rovi yuborildi. Admin tasdiqlagach faollashadi");
+  refresh();
+}
+
+async function loadAdmin(){
+  try{A=await api('/api/admin/data',{admin:true})}
+  catch(e){if(e.status===401){ls.set('a555_admin','');isAdmin=false;A=null;if(curField==='ADMIN')curField='A';render()}return}
+  isAdmin=true;
+  if(!pricesFilled){$('cNum').value=fmtCard(A.card.number);$('cHol').value=A.card.holder;$('pSlot').value=A.prices.slot;$('pDisc').value=A.prices.discount;$('pSil').value=A.prices.silver;$('pGol').value=A.prices.gold;pricesFilled=true}
+  renderAdmin();renderTabs();
+}
+function renderAdmin(){
+  const stl={pending:['Kutilmoqda','st-p'],accepted:['Tasdiqlandi','st-a'],active:['Faol','st-a'],expired:['Muddati tugagan','st-x']};
+  const ph=p=>`<a href="tel:+998${esc(p)}" style="color:var(--g)">${esc(fmtPhone(p))}</a>`;
+  $('aSubs').innerHTML=A.subs.length?A.subs.map(s=>{
+    const until=s.until?` • ${new Date(s.until).toLocaleDateString('ru-RU')} gacha`:'';
+    return `<div class="bk"><div><b>${PLAN[s.plan]}</b> • ${esc(s.name)}<small>${ph(s.phone)} • ${money(s.price)} so'm • <span class="${stl[s.status][1]}">${stl[s.status][0]}</span>${until}</small></div>
+      <div class="btns">${s.status==='pending'?`<button class="btn ok" onclick="adminSub(${s.id},'accept')">Qabul</button>`:''}<button class="btn no" onclick="adminSub(${s.id},'delete')">O'chirish</button></div></div>`}).join('')
+    :`<p class="empty">Obunalar yo'q</p>`;
+  $('aBooks').innerHTML=A.bookings.length?A.bookings.map(b=>
+    `<div class="bk"><div><b>${b
